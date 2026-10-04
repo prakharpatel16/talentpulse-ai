@@ -1,10 +1,37 @@
-# TalentPulse
+<div align="center">
+  <h1>TalentPulse</h1>
+  <p><strong>AI-powered recruitment and talent management</strong></p>
+  <p>One workspace for job discovery, resume insights, applications, interviews, and recruiter workflows.</p>
+  <p>
+    <img src="https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white" alt="React 19" />
+    <img src="https://img.shields.io/badge/Node.js-Express-339933?logo=nodedotjs&logoColor=white" alt="Node.js and Express" />
+    <img src="https://img.shields.io/badge/MongoDB-Mongoose-47A248?logo=mongodb&logoColor=white" alt="MongoDB and Mongoose" />
+    <img src="https://img.shields.io/badge/AI-Gemini%20%7C%20RAG-4285F4?logo=googlegemini&logoColor=white" alt="Gemini and RAG" />
+  </p>
+  <p>
+    <a href="https://github.com/prakharpatel16/talentpulse-ai">GitHub repository</a> ·
+    <a href="https://www.linkedin.com/in/prakharpatel674/">LinkedIn</a> ·
+    <a href="mailto:patelprakhar674@gmail.com">Email</a>
+  </p>
+</div>
 
-**AI-assisted recruitment and talent management for candidates and hiring teams.**
+> **Human-centered AI:** TalentPulse provides structured suggestions for people to review. It does not make hiring decisions.
 
-TalentPulse brings job discovery, resume processing, applications, recruiter workflows, interview assessments, and a recruitment assistant into one web application.
+## Contents
 
-> This repository is an actively developed project. AI output is decision support for human review, not an automated hiring decision.
+- [Features](#features)
+- [Technology stack](#technology-stack)
+- [Architecture](#architecture)
+- [Resume processing](#resume-processing)
+- [Recruiter AI assistant (RAG)](#recruiter-ai-assistant-rag)
+- [Quick start](#quick-start)
+- [Environment variables](#environment-variables)
+- [API overview](#api-overview)
+- [Deployment](#deployment)
+- [Current limitations](#current-limitations)
+- [Project structure](#project-structure)
+- [Contact](#contact)
+- [License](#license)
 
 ## Features
 
@@ -202,7 +229,7 @@ All API routes are under **/api**.
 | /rag | Assistant queries and conversation threads |
 | /notifications | List and mark notifications read |
 
-See the interactive [Swagger API docs](http://localhost:5000/api/docs) while running locally, or read [PROJECT_DOCUMENTATION.md](PROJECT_DOCUMENTATION.md) for the full endpoint list and architecture.
+Open the interactive [Swagger API docs](http://localhost:5000/api/docs) while the API is running locally. The architecture and route overview are documented in this README.
 
 ## Tests and production build
 
@@ -239,21 +266,50 @@ Before scaling the API and worker separately or running multiple API instances, 
 
 ## Project structure
 
+The repository is a two-part application: a Vite-powered React client and a Node.js/Express server. The resume worker runs as a separate server process.
+
 ~~~text
-client/
-  src/pages/                 Candidate and recruiter pages
-  src/components/            Shared application shell
-  src/lib/                   API client and auth context
-server/
-  src/controllers/           API request handlers
-  src/routes/                REST endpoints
-  src/models/                 Mongoose data models
-  src/services/               AI, parsing, cache, notifications, authorization
-  src/queues/                 BullMQ queue and Redis adapter
-  src/workers/                Resume-processing worker
-  src/start-all.js            API/worker supervisor for single-service deploys
-  src/server.js               API and Socket.IO entry point
-  src/worker.js               Worker entry point
-  tests/                      Backend tests
-PROJECT_DOCUMENTATION.md      Full feature and architecture reference
-Architecture.md.md            Backend architecture notes
+TalentPulse/
+├── client/
+│   ├── src/
+│   │   ├── components/       Shared application shell
+│   │   ├── lib/              API client and authentication context
+│   │   ├── pages/            Candidate and recruiter screens
+│   │   ├── App.jsx
+│   │   └── main.jsx
+│   ├── .env.example
+│   ├── package.json
+│   └── vite.config.js
+├── server/
+│   ├── src/
+│   │   ├── config/           MongoDB, Redis, environment, Swagger
+│   │   ├── controllers/      REST request handlers
+│   │   ├── middleware/       Authentication, validation, security
+│   │   ├── models/           Mongoose schemas
+│   │   ├── queues/           BullMQ queue and Redis client
+│   │   ├── routes/           REST API route definitions
+│   │   ├── services/         AI, RAG, parsing, cache, notifications
+│   │   ├── utils/            Shared helpers and demo data
+│   │   ├── validators/       Request schemas
+│   │   ├── workers/          Resume-processing worker logic
+│   │   ├── app.js
+│   │   ├── server.js         API and Socket.IO entry point
+│   │   ├── start-all.js      API/worker process supervisor
+│   │   └── worker.js         Worker entry point
+│   ├── tests/                Backend tests
+│   ├── .env.example
+│   └── package.json
+├── .gitignore
+└── README.md
+~~~
+
+## Contact
+
+**Prakhar Patel**
+
+- LinkedIn: [linkedin.com/in/prakharpatel674](https://www.linkedin.com/in/prakharpatel674/)
+- Email: [patelprakhar674@gmail.com](mailto:patelprakhar674@gmail.com)
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
