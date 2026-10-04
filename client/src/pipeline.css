@@ -1,0 +1,2 @@
+.pipeline-board{grid-template-columns:repeat(6,minmax(225px,1fr))}
+@media(max-width:760px){.pipeline-board{grid-template-columns:repeat(6,240px)}}
