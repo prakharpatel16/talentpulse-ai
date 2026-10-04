@@ -12,6 +12,15 @@ const REDIS_URL = process.env.REDIS_URL;
 const UPLOAD_DIR = process.env.UPLOAD_DIR
   ? path.resolve(process.env.UPLOAD_DIR)
   : path.resolve(__dirname, "../../uploads");
+const CLIENT_URLS = [
+  ...new Set([
+    ...(CLIENT_URL || "http://localhost:5173")
+      .split(",")
+      .map((url) => url.trim().replace(/\/+$/, ""))
+      .filter(Boolean),
+    "https://talentpulse-chi.vercel.app",
+  ]),
+];
 
 if (
   NODE_ENV === "production" &&
@@ -32,10 +41,7 @@ module.exports = {
   PORT: process.env.PORT || 5000,
   NODE_ENV,
   CLIENT_URL: CLIENT_URL || "http://localhost:5173",
-  CLIENT_URLS: (CLIENT_URL || "http://localhost:5173")
-    .split(",")
-    .map((url) => url.trim())
-    .filter(Boolean),
+  CLIENT_URLS,
   JWT_SECRET: JWT_SECRET || "development-only-jwt-secret-change-before-deploy",
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || "7d",
   COOKIE_SECRET:

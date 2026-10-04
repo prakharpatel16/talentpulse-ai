@@ -67,6 +67,33 @@ test("CORS allows the configured client and denies an unrelated origin", async (
   assert.equal(denied.headers["access-control-allow-origin"], undefined);
 });
 
+test("production frontend gets credentialed CORS on preflight and API errors", async () => {
+  const origin = "https://talentpulse-chi.vercel.app";
+  const preflight = await request(app)
+    .options("/api/auth/me")
+    .set("Origin", origin)
+    .set("Access-Control-Request-Method", "GET");
+
+  assert.equal(preflight.status, 204);
+  assert.equal(preflight.headers["access-control-allow-origin"], origin);
+  assert.equal(preflight.headers["access-control-allow-credentials"], "true");
+
+  const responses = await Promise.all([
+    request(app).get("/api/auth/me").set("Origin", origin),
+    request(app).get("/api/resumes/me").set("Origin", origin),
+    request(app).get("/api/resumes").set("Origin", origin),
+  ]);
+
+  assert.deepEqual(
+    responses.map((response) => response.status),
+    [401, 401, 404],
+  );
+  for (const response of responses) {
+    assert.equal(response.headers["access-control-allow-origin"], origin);
+    assert.equal(response.headers["access-control-allow-credentials"], "true");
+  }
+});
+
 test("production configuration rejects placeholder secrets and local database defaults", () => {
   const env = {
     ...process.env,

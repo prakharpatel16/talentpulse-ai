@@ -1,5 +1,9 @@
 <div align="center">
-  <h1>TalentPulse</h1>
+  <h1>
+    <a href="https://talentpulse-chi.vercel.app/">
+      <img src="assets/talentpulse-wordmark.svg" alt="TalentPulse" width="560" />
+    </a>
+  </h1>
   <p><strong>AI-powered recruitment and talent management</strong></p>
   <p>One workspace for job discovery, resume insights, applications, interviews, and recruiter workflows.</p>
   <p>
@@ -9,6 +13,7 @@
     <img src="https://img.shields.io/badge/AI-Gemini%20%7C%20RAG-4285F4?logo=googlegemini&logoColor=white" alt="Gemini and RAG" />
   </p>
   <p>
+    <a href="https://talentpulse-chi.vercel.app/"><strong>Live Demo</strong></a> ·
     <a href="https://github.com/prakharpatel16/talentpulse-ai">GitHub repository</a> ·
     <a href="https://www.linkedin.com/in/prakharpatel674/">LinkedIn</a> ·
     <a href="mailto:patelprakhar674@gmail.com">Email</a>
