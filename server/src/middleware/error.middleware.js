@@ -1,10 +1,15 @@
 const logger = require('../utils/logger');
 const ApiResponse = require('../utils/apiResponse');
+const { NODE_ENV } = require('../config/env');
 
 const errorHandler = (err, req, res, next) => {
   logger.error(`[Error] ${req.method} ${req.originalUrl}: ${err.message}`, {
     stack: err.stack
   });
+
+  if (err.type === 'entity.parse.failed' && err.status === 400) {
+    return ApiResponse.badRequest(res, 'Request body must contain valid JSON.', 'INVALID_JSON');
+  }
 
   if (err.name === 'ValidationError') {
     const errors = Object.values(err.errors).map(e => ({
@@ -31,7 +36,10 @@ const errorHandler = (err, req, res, next) => {
     return ApiResponse.badRequest(res, `Invalid resource identifier format: ${err.value}`);
   }
 
-  return ApiResponse.error(res, err.message || 'An unexpected internal server error occurred.');
+  const message = NODE_ENV === 'production'
+    ? 'An unexpected server error occurred. Please try again.'
+    : err.message || 'An unexpected internal server error occurred.';
+  return ApiResponse.error(res, message, 'SERVER_ERROR', 500);
 };
 
 module.exports = errorHandler;

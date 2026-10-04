@@ -4,6 +4,7 @@ const { execFileSync } = require("node:child_process");
 const path = require("node:path");
 const request = require("supertest");
 const app = require("../src/app");
+const asyncHandler = require("../src/middleware/asyncHandler");
 const Job = require("../src/models/Job");
 const Application = require("../src/models/Application");
 const {
@@ -81,17 +82,83 @@ test("production frontend gets credentialed CORS on preflight and API errors", a
   const responses = await Promise.all([
     request(app).get("/api/auth/me").set("Origin", origin),
     request(app).get("/api/resumes/me").set("Origin", origin),
+    request(app)
+      .post("/api/rag/query")
+      .set("Origin", origin)
+      .send({ question: "CORS diagnostic only" }),
     request(app).get("/api/resumes").set("Origin", origin),
   ]);
 
   assert.deepEqual(
     responses.map((response) => response.status),
-    [401, 401, 404],
+    [401, 401, 401, 404],
   );
   for (const response of responses) {
     assert.equal(response.headers["access-control-allow-origin"], origin);
     assert.equal(response.headers["access-control-allow-credentials"], "true");
   }
+});
+
+test("invalid JSON returns a structured 400 with CORS headers", async () => {
+  const origin = "https://talentpulse-chi.vercel.app";
+  const response = await request(app)
+    .post("/api/auth/login")
+    .set("Origin", origin)
+    .set("Content-Type", "application/json")
+    .send('{"email":');
+
+  assert.equal(response.status, 400);
+  assert.deepEqual(response.body, {
+    success: false,
+    message: "Request body must contain valid JSON.",
+    errorCode: "INVALID_JSON",
+  });
+  assert.equal(response.headers["access-control-allow-origin"], origin);
+});
+
+test("async controller rejections are forwarded to Express error handling", async () => {
+  const expected = new Error("controller failed");
+  let received;
+  asyncHandler(async () => {
+    throw expected;
+  })({}, {}, (error) => {
+    received = error;
+  });
+
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(received, expected);
+});
+
+test("production server errors do not expose internal exception messages", () => {
+  const env = {
+    ...process.env,
+    NODE_ENV: "production",
+    JWT_SECRET: "a".repeat(40),
+    COOKIE_SECRET: "b".repeat(40),
+    MONGODB_URI: "mongodb://127.0.0.1/talentpulse-test",
+    CLIENT_URL: "https://talentpulse-chi.vercel.app",
+    REDIS_URL: "redis://127.0.0.1:6379",
+  };
+  const script = [
+    "const logger = require('./src/utils/logger'); logger.error = () => {};",
+    "const errorHandler = require('./src/middleware/error.middleware');",
+    "const res = { statusCode: 0, status(code) { this.statusCode = code; return this; }, json(body) { this.body = body; return this; } };",
+    "errorHandler(new Error('internal database credential detail'), { method: 'GET', originalUrl: '/api/private' }, res, () => {});",
+    "process.stdout.write(JSON.stringify({ statusCode: res.statusCode, body: res.body }));",
+  ].join("\n");
+  const output = execFileSync(process.execPath, ["-e", script], {
+    cwd: path.resolve(__dirname, ".."),
+    env,
+    encoding: "utf8",
+  });
+  const result = JSON.parse(output);
+
+  assert.equal(result.statusCode, 500);
+  assert.deepEqual(result.body, {
+    success: false,
+    message: "An unexpected server error occurred. Please try again.",
+    errorCode: "SERVER_ERROR",
+  });
 });
 
 test("production configuration rejects placeholder secrets and local database defaults", () => {

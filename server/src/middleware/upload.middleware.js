@@ -1,5 +1,6 @@
 const multer = require("multer");
 const fs = require("fs");
+const path = require("node:path");
 const { UPLOAD_DIR } = require("../config/env");
 
 if (!fs.existsSync(UPLOAD_DIR)) {
